@@ -25,7 +25,7 @@ def _process_args(x, weights):
         x = x[np.newaxis,:,:]
 
     x = np.atleast_1d(x)
-
+    
     n1, n2, ndim = np.shape(x)
 
     if weights is None:

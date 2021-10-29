@@ -169,10 +169,12 @@ def generate_matching_halos(halo_properties, resolution, rotate=True):
     """
     halos = []
     true_major_axes = []
-    for row in halo_properties:
+    if isinstance(resolution, int):
+        resolution = (np.ones(len(halo_properties))*resolution).astype(int)
+    for i in range(len(halo_properties)):
         
-        a, b, c, Ax, Ay, Az = row
-        conc = np.zeros(resolution)+5.
+        a, b, c, Ax, Ay, Az = halo_properties[i]
+        conc = np.zeros(resolution[i])+5.
         # The placing of a,b,c makes z the major axis, x the intermediate, and y the minor
         x, y, z = random_nfw_ellipsoid(conc, a=b, b=c, c=a)
         coords = np.array( [ coord for coord in zip(x,y,z) ] )
