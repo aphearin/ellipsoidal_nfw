@@ -125,7 +125,7 @@ def get_rotation_matrix(a, b):
 
 def extract_halo_properties(halo_table):
     properties = np.array( [ halo_table["halo_b_to_a"], halo_table["halo_c_to_a"], halo_table["halo_axisA_x"], halo_table["halo_axisA_y"], \
-                                        halo_table["halo_axisA_z"] ] )
+                                        halo_table["halo_axisA_z"], halo_table["halo_nfw_conc"] ] )
     properties = np.vstack( [ np.ones(len(halo_table)), properties ] ).T
     return properties
 
@@ -153,7 +153,7 @@ def rotate_halos(axes_A, axes_B, halos):
         
     return [ rotate_vector_collection( [ R[i] ], halos[i] ) for i in range(len(halos)) ]
 
-def generate_matching_halos(halo_properties, resolution, rotate=True):
+def generate_matching_halos(halo_properties, resolution, rotate=True, concentration=None):
     """
     Generates halos as lists of (x,y,z) points based on the halo properties given
     
@@ -161,6 +161,8 @@ def generate_matching_halos(halo_properties, resolution, rotate=True):
         halo_properties                    - (npts,ndim) list where each row is a halo.
                                              The ndim values used to make the halo are: a, b, c, major_axis_x, major_axis_y, major_axis_z
         resolution                         - The number of particles to generate for the halo
+        concentration                    - Only use if you want all halos to have the same concentration. None indicates that the code
+                                                    will use the halo_nfw_conc from the halocat
     
     Returns:
         halos                              - (npts) list where each element is a list of length (resolution) of (x,y,z) points
@@ -173,8 +175,10 @@ def generate_matching_halos(halo_properties, resolution, rotate=True):
         resolution = (np.ones(len(halo_properties))*resolution).astype(int)
     for i in range(len(halo_properties)):
         
-        a, b, c, Ax, Ay, Az = halo_properties[i]
-        conc = np.zeros(resolution[i])+5.
+        a, b, c, Ax, Ay, Az, halo_conc = halo_properties[i]
+        if not concentration is None:
+            halo_conc = concentration
+        conc = np.zeros(resolution[i])+halo_conc
         # The placing of a,b,c makes z the major axis, x the intermediate, and y the minor
         x, y, z = random_nfw_ellipsoid(conc, a=b, b=c, c=a)
         coords = np.array( [ coord for coord in zip(x,y,z) ] )
